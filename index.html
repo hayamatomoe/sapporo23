@@ -4,8 +4,7 @@
         <meta charset="utf-8">
         <title>Yuki Yamamoto + Tatsuki Hayama</title>
 
-        <script type="text/javascript" src="https://rawgit.com/patriciogonzalezvivo/glslCanvas/master/dist/GlslCanvas.js"></script>
-        <script type="text/javascript" src="https://cdn.rawgit.com/github/fetch/master/fetch.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/glsl-canvas-js/dist/umd/glsl-canvas.min.js"></script>
 	    <style>
             body {
                 background: #101515;
@@ -21,8 +20,7 @@
     </head>
 	
     <body>
-        <canvas class="glslCanvas" data-fragment="
-#version 300 es
+        <canvas id="glslCanvas" controls data-fragment="#version 300 es
 precision highp float;
 precision highp int;
 out vec4 fragColor;
@@ -177,16 +175,13 @@ void main(void){
     fragColor = color;
 }
 " width="800" height="600"></canvas>
-
-        <div id="credits">
-            <p class="label" id="title"></p>
-            <p class="label" id="author"></p>
-        </div>
-    </body>
-	<script>
-        var canvas = document.getElementById("glslCanvas");
-        var sandbox = new GlslCanvas(canvas);
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
+</body>
+<script>
+const canvas = document.getElementById('glslCanvas');
+const gl = new glsl.Canvas(canvas);
+canvas.style.width = '100%';
+canvas.style.height = '100%';
+        
+        
 </script>
 </html>
