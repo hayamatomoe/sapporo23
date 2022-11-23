@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>GlslCanvas</title>
+
+        <script type="text/javascript" src="https://rawgit.com/patriciogonzalezvivo/glslCanvas/master/dist/GlslCanvas.js"></script>
+        <script type="text/javascript" src="https://cdn.rawgit.com/github/fetch/master/fetch.js"></script>
+
+        <style>
+            body {
+                background: #101515;
+            }
+
+            #glslCanvas {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%,-50%);
+            }​
+
+            .blank {
+
+            }
+
+            #credits {
+                position: absolute; 
+                bottom: 10px; 
+                right: 15px; 
+                text-align: right;
+                background: rgba(0,0,0,.5);
+                padding: 12px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                margin: 0px
+            }
+
+            .label {
+                color: white;
+                font-family: Helvetica, Arial, sans-serif;
+                text-decoration: none; 
+                line-height: 0.0;
+            }
+
+            #title {
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+            #author {
+                font-size: 14px; 
+                font-style: italic;
+                font-weight: 100;
+            }
+        </style>
+
+    </head>
+    <body>
+        <canvas id="glslCanvas" data-fragment="
+#version 300 es
+precision highp float;
+precision highp int;
+out vec4 fragColor;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec4 u_vec;
+const float PI = 3.141592;
+
+const uint UINT_MAX = 0xffffffffu;
+uvec4 k = uvec4(0x456789abu, 0x6789ab45u, 0x89ab4567u, 0xab456789u);
+uvec4 u = uvec4(1, 2, 3, 4);
+uvec2 uhash22(uvec2 n){
+    n ^= (n.yx << u.xy);
+    n ^= (n.yx >> u.xy);
+    n *= k.xy;
+    n ^= (n.yx << u.xy);
+    return n * k.xy;
+}
+uvec3 uhash33(uvec3 n){
+    n ^= (n.yzx << u.xyz);
+    n ^= (n.yzx >> u.xyz);
+    n *= k.xyz;
+    n ^= (n.yzx << u.xyz);
+    return n * k.xyz;
+}
+uvec4 uhash44(uvec4 n){
+    n ^= (n.yzwx << u.xyzw);
+    n ^= (n.yzwx >> u.xyzw);
+    n *= k;
+    n ^= (n.yzwx << u.xyzw);
+    return n * k;
+}
+vec2 hash22(vec2 p){
+    uvec2 n = floatBitsToUint(p);
+    return vec2(uhash22(n)) / vec2(UINT_MAX);
+}
+vec3 hash33(vec3 p){
+    uvec3 n = floatBitsToUint(p);
+    return vec3(uhash33(n)) / vec3(UINT_MAX);
+}
+vec4 hash44(vec4 p){
+    uvec4 n = floatBitsToUint(p);
+    return vec4(uhash44(n)) / vec4(UINT_MAX);
+}
+float hash21(vec2 p){
+    uvec2 n = floatBitsToUint(p);
+    return float(uhash22(n).x) / float(UINT_MAX);
+    //nesting approach
+    //return float(uhash11(n.x+uhash11(n.y)) / float(UINT_MAX)
+}
+float hash31(vec3 p){
+    uvec3 n = floatBitsToUint(p);
+    return float(uhash33(n).x) / float(UINT_MAX);
+    //nesting approach
+    //return float(uhash11(n.x+uhash11(n.y+uhash11(n.z))) / float(UINT_MAX)
+}
+
+//begin rot
+vec2 rot2(vec2 p, float t){
+    return vec2(cos(t) * p.x -sin(t) * p.y, sin(t) * p.x + cos(t) * p.y);
+}
+vec3 rotX(vec3 p, float t){
+    p.yz = rot2(p.yz, t);
+    return p;
+}
+vec3 rotY(vec3 p, float t){
+    p.xz = rot2(p.xz, t);
+    return p;
+}
+vec3 rotZ(vec3 p, float t){
+    p.xy = rot2(p.xy, t);
+    return p;
+}
+vec3 euler(vec3 p, vec3 t){
+    return rotX(rotY(rotZ(p, t.x),t.y),t.z);
+}
+//end rot
+float intersec(vec3 ro, vec3 rd, vec3 cent, float rad){
+	vec3 a = normalize(rd);
+	vec3 b = normalize(cent-ro);
+	float c = dot(a,b);
+	float s2 = 1.0 - c * c;
+	float l2 = dot(cent-ro, cent-ro);
+	return l2 * s2 > rad * rad ? -1.0:
+		length(cent-ro) * c -sqrt(rad * rad - s2 * l2);
+		// 1.0;
+}
+
+float sphereSDF(vec3 p, vec3 cent, float rad){
+    return length(p - cent) - rad;
+}
+float sceneSDF(vec3 p){
+    return sphereSDF(p, vec3(0.), 0.1);
+}
+vec4 sort(vec4 list, float v){
+    bvec4 res = bvec4(step(v, list));
+    return res.x ? vec4(v, list.xyz):
+        res.y ? vec4(list.x, v, list.yz):
+        res.z ? vec4(list.xy, v, list.z):
+        res.w ? vec4(list.xyz, v):
+        list;
+}
+vec4 fdist34(vec3 p){
+    vec3 n = floor(p + 0.5);
+    vec4 dist4 = vec4(length(1.5 - abs(p - n)));
+    vec4 col = vec4(0);
+    float count = 0.;
+    for(float k = 0.0; k <= 4.0; k ++ ){
+            vec3 glid;
+            glid.z = n.z + sign(mod(k, 2.0) - 0.5) * ceil(k * 0.5);
+            if (abs(glid.z - p.z) - 0.5 > dist4.w){
+                continue;
+            }
+        for(float j = 0.0; j <= 4.0; j ++ ){
+            glid.y = n.y + sign(mod(j, 2.0) - 0.5) * ceil(j * 0.5);
+            if (abs(glid.y - p.y) - 0.5 > dist4.w){
+                continue;
+            }
+            for(float i = -2.0; i <= 2.0; i ++ ){
+                glid.x = n.x + i;
+                vec3 jitter = hash33(glid) - 0.5;
+                jitter *= u_vec.w;
+                if (length(glid + jitter - p) < u_vec.y*hash31(glid)){
+                    count++;
+                    // col += (dot(glid + jitter - p, normalize(vec3(.5)-hash33(glid))))*hash33(glid);
+                    float stripe = step(
+                        fract(dot(normalize(vec3(.5)-hash33(glid)),dot(glid + jitter - p, normalize(vec3(.5)-hash33(glid)))*8.*p)),
+                        hash31(glid));
+                    col.xyz += stripe
+                    *mix(hash33(glid+hash33(glid)),
+                        hash33(glid),
+                        (dot(glid + jitter - p, normalize(vec3(.5)-hash33(glid)))));
+                    if (stripe > 0.1){
+                        col.w += 1.5;
+                        }
+                    // col *= hash33(glid);
+                };
+            }
+        }
+    }
+    return col/count;
+}
+void main(void){
+    // fragment position
+    vec2 pix = (gl_FragCoord.xy*2.-u_resolution.xy)/min(u_resolution.x,u_resolution.y);
+    // inclusion
+    vec3 pos = 10.*u_vec.x*vec3(pix.x, pix.y, 0.);
+    pos = euler(pos, vec3(0.1*PI*u_time));
+    pos+=u_vec.z*10.;
+    vec4 color; 
+    color = fdist34(pos);
+    // pos = euler(pos/2., vec3(0.01*PI));
+    // color.rgb -= fdist34(pos);
+    color.a = 1.;
+    fragColor = TDOutputSwizzle(color);
+}
+" width="800" height="600"></canvas>
+
+        <div id="credits">
+            <p class="label" id="title"></p>
+            <p class="label" id="author"></p>
+        </div>
+    </body>
+
+</html>
