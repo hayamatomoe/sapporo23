@@ -6,8 +6,20 @@
 
         <script type="text/javascript" src="https://rawgit.com/patriciogonzalezvivo/glslCanvas/master/dist/GlslCanvas.js"></script>
         <script type="text/javascript" src="https://cdn.rawgit.com/github/fetch/master/fetch.js"></script>
+	    <style>
+            body {
+                background: #101515;
+            }
 
+            #glslCanvas {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%,-50%);
+            }
+        </style>
     </head>
+	
     <body>
         <canvas class="glslCanvas" data-fragment="
 #version 300 es
@@ -171,5 +183,10 @@ void main(void){
             <p class="label" id="author"></p>
         </div>
     </body>
+	<script>
+        var canvas = document.getElementById("glslCanvas");
+        var sandbox = new GlslCanvas(canvas);
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
 
 </html>
