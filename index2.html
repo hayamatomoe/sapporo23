@@ -187,7 +187,9 @@ void main(){
 <script>
 const canvas = document.getElementById('glslCanvas');
 const gl = new glsl.Canvas(canvas);
-canvas.style.position = 'absolute';
+// canvas.style.position = 'absolute';
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 canvas.style.top = '0px';
 canvas.style.left = '0px';
 canvas.style.width = '100%';
