@@ -178,7 +178,7 @@ void main(){
 #else
 
 void main(){
- 	//vec4 color=texture(u_buffer0,uv);
+ 	vec4 color=texture(u_buffer0,gl_FragCoord.xy/u_resolution.xy);
 	fragColor=vec4(1);
 }
 
