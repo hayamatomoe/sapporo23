@@ -5,7 +5,7 @@
         <title>Yuki Yamamoto + Tatsuki Hayama</title>
 
         <script type="text/javascript" src="https://unpkg.com/glsl-canvas-js/dist/umd/glsl-canvas.min.js"></script>
-	    <style>
+<!-- 	    <style>
             body {
                 background: #101515;
             }
@@ -15,7 +15,7 @@
                 top: 0%;
                 left: 0%;
             }
-        </style>
+        </style> -->
     </head>
 	
     <body>
@@ -187,6 +187,9 @@ void main(){
 <script>
 const canvas = document.getElementById('glslCanvas');
 const gl = new glsl.Canvas(canvas);
+canvas.style.position = 'absolute';
+canvas.style.top = '0px';
+canvas.style.left = '0px';
 canvas.style.width = '100%';
 canvas.style.height = '100%';
         
