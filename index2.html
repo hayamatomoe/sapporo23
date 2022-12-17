@@ -5,17 +5,17 @@
         <title>Yuki Yamamoto + Tatsuki Hayama</title>
 
         <script type="text/javascript" src="https://unpkg.com/glsl-canvas-js/dist/umd/glsl-canvas.min.js"></script>
-<!-- 	    <style>
+	    <style>
             body {
                 background: #101515;
             }
-
             #glslCanvas {
-		position: fixed;
-                top: 0%;
-                left: 0%;
+                top: 0px;
+                left: 0px;
+                width: 100%;
+                height: 100%;
             }
-        </style> -->
+        </style>
     </head>
 	
     <body>
@@ -177,24 +177,16 @@ void main(){
 #else
 
 void main(){
- 	vec4 color=texture(u_buffer0,uv);
+	vec4 color=texture(u_buffer0,uv);
 	fragColor=color;
 }
 
 #endif
-" width="100" height="100"></canvas>
+" width = '200' height = '200'></canvas>
+</div>
 </body>
 <script>
 const canvas = document.getElementById('glslCanvas');
-const gl = new glsl.Canvas(canvas);
-// canvas.style.position = 'absolute';
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-canvas.style.top = '0px';
-canvas.style.left = '0px';
-canvas.style.width = '100%';
-canvas.style.height = '100%';
-        
-        
+const gl = new glsl.Canvas(canvas);     
 </script>
 </html>
